@@ -1,26 +1,33 @@
 package com.example.retrofit
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.retrofit.adapter.ProductAdapter
 import com.example.retrofit.databinding.ActivityMainBinding
-import com.example.retrofit.retrofit.AuthRequest
 import com.example.retrofit.retrofit.MainApi
-import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var adapter: ProductAdapter
     lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        adapter = ProductAdapter()
+        binding.rcView.layoutManager = LinearLayoutManager(this)
+        binding.rcView.adapter = adapter
+
 
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = HttpLoggingInterceptor.Level.BODY
@@ -34,20 +41,11 @@ class MainActivity : AppCompatActivity() {
             .addConverterFactory(GsonConverterFactory.create()).build()
         val mainApi = retrofit.create(MainApi::class.java)
 
-        binding.button.setOnClickListener {
-            CoroutineScope(Dispatchers.IO).launch {
-                val user = mainApi.auth(
-                    AuthRequest(
-                        binding.usarename.text.toString(),
-                        binding.password.text.toString()
-                    )
-                )
-                runOnUiThread {
-                    binding.apply {
-                        Picasso.get().load(user.image).into(iv)
-                        firstName.text = user.firstName
-                        lastName.text = user.lastName
-                    }
+        CoroutineScope(Dispatchers.IO).launch {
+            val list = mainApi.getAllProducts()
+            runOnUiThread {
+                binding.apply {
+                    adapter.submitList(list.products)
                 }
             }
         }
