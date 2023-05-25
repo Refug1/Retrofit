@@ -6,7 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.retrofit.adapter.ProductAdapter
 import com.example.retrofit.databinding.ActivityMainBinding
+import com.example.retrofit.retrofit.AuthRequest
 import com.example.retrofit.retrofit.MainApi
+import com.example.retrofit.retrofit.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        supportActionBar?.title = "Гость"
         adapter = ProductAdapter()
         binding.rcView.layoutManager = LinearLayoutManager(this)
         binding.rcView.adapter = adapter
@@ -41,10 +43,28 @@ class MainActivity : AppCompatActivity() {
             .addConverterFactory(GsonConverterFactory.create()).build()
         val mainApi = retrofit.create(MainApi::class.java)
 
+
+
+
+        var user: User? = null
+
+        CoroutineScope(Dispatchers.IO).launch {
+            user = mainApi.auth(
+                AuthRequest(
+                    "kminchelle",
+                    "0lelplR"
+                )
+            )
+            runOnUiThread {
+                supportActionBar?.title = user?.firstName
+            }
+        }
+
+
         binding.sv.setOnQueryTextListener(object : OnQueryTextListener{
             override fun onQueryTextSubmit(text: String?): Boolean {
                 CoroutineScope(Dispatchers.IO).launch {
-                    val list = text?.let { mainApi.getProductsByName(it) }
+                    val list = text?.let { mainApi.getProductsByNameAuth(user?.token ?: "", it) }
                     runOnUiThread {
                         binding.apply {
                             adapter.submitList(list?.products)
@@ -57,6 +77,7 @@ class MainActivity : AppCompatActivity() {
             override fun onQueryTextChange(text: String?): Boolean {
                 return true
             }
+
         })
     }
 }
