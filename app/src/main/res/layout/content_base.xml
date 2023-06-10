@@ -37,7 +37,7 @@
         android:layout_height="59dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="24dp"
-        android:text="Тортильня"
+        android:text="&quot;Не сладко&quot;"
         android:textSize="34sp"
         android:textStyle="bold|italic"
         app:layout_constraintStart_toEndOf="@+id/imageView2"
