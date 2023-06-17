@@ -1,83 +1,50 @@
 package com.example.retrofit
 
 import android.os.Bundle
-import android.widget.SearchView.OnQueryTextListener
+import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.retrofit.adapter.ProductAdapter
+import androidx.core.view.WindowCompat
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.setupActionBarWithNavController
+import android.view.Menu
+import android.view.MenuItem
 import com.example.retrofit.databinding.ActivityMainBinding
-import com.example.retrofit.retrofit.AuthRequest
 import com.example.retrofit.retrofit.MainApi
-import com.example.retrofit.retrofit.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var adapter: ProductAdapter
-    lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        supportActionBar?.title = "Гость"
-        adapter = ProductAdapter()
-        binding.rcView.layoutManager = LinearLayoutManager(this)
-        binding.rcView.adapter = adapter
-
-
-        val interceptor = HttpLoggingInterceptor()
-        interceptor.level = HttpLoggingInterceptor.Level.BODY
-
-        val client = OkHttpClient.Builder()
-            .addInterceptor(interceptor)
-            .build()
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://dummyjson.com").client(client)
-            .addConverterFactory(GsonConverterFactory.create()).build()
-        val mainApi = retrofit.create(MainApi::class.java)
+            .baseUrl("https://api.weatherapi.com/v1/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
 
-
-
-
-        var user: User? = null
-
-        CoroutineScope(Dispatchers.IO).launch {
-            user = mainApi.auth(
-                AuthRequest(
-                    "kminchelle",
-                    "0lelplR"
+        binding.request.setOnClickListener {
+            CoroutineScope(Dispatchers.Main).launch {
+                val api = retrofit.create(MainApi::class.java)
+                val model = api.getWeatherData(
+                    "71905cf4f2ab40da9e8142341222207",
+                    "London",
+                    "3",
+                    "no",
+                    "no"
                 )
-            )
-            runOnUiThread {
-                supportActionBar?.title = user?.firstName
+                binding.temp.text = model.current.temp_c.toString()
+                binding.date.text = model.location.name
             }
         }
-
-
-        binding.sv.setOnQueryTextListener(object : OnQueryTextListener{
-            override fun onQueryTextSubmit(text: String?): Boolean {
-                CoroutineScope(Dispatchers.IO).launch {
-                    val list = text?.let { mainApi.getProductsByNameAuth(user?.token ?: "", it) }
-                    runOnUiThread {
-                        binding.apply {
-                            adapter.submitList(list?.products)
-                        }
-                    }
-                }
-                return true
-            }
-
-            override fun onQueryTextChange(text: String?): Boolean {
-                return true
-            }
-
-        })
     }
 }
