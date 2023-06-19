@@ -29,15 +29,15 @@
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@mipmap/cake" />
+        app:srcCompat="@mipmap/lampa" />
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="194dp"
-        android:layout_height="59dp"
+        android:layout_width="223dp"
+        android:layout_height="128dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="24dp"
-        android:text="&quot;Не сладко&quot;"
+        android:text="&quot;ИДЕЯ&quot; лампы"
         android:textSize="34sp"
         android:textStyle="bold|italic"
         app:layout_constraintStart_toEndOf="@+id/imageView2"

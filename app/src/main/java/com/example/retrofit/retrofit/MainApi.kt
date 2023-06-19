@@ -18,7 +18,7 @@ interface MainApi {
     suspend fun auth(@Body authRequest: AuthRequest): Response<User>
 
     @Headers("Content-Type: application/json")
-    @GET("auth/products")
+    @GET("auth/products/category/lighting")
     suspend fun getAllProducts(@Header("Authorization") token: String): Products
 
     @Headers("Content-Type: application/json")
